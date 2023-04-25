@@ -1,3 +1,5 @@
+package CEN3024C.WordOccurrences;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -22,13 +24,13 @@ public class Analyzer {
      * @param args - This parameter allows the analyzer class to accept provided information from other classes.
      * @throws Exception - This statement was added to avoid errors when providing information to the console.
      */
-    public static void urlAnalyzer(String args) throws Exception {
+    public static void urlAnalyzer(String args, Controller controller) throws Exception {
 
 
         //Reading Directly from a URL tutorial
         //https://docs.oracle.com/javase/tutorial/networking/urls/readingURL.html
         //URL TPG = new URL("https://www.gutenberg.org/files/1065/1065-h/1065-h.htm");  //Modified URL from tutorial to reflect required URL
-        URL TPG = new URL(Main.myURL);
+        URL TPG = new URL(args);
         BufferedReader in = new BufferedReader
                 (
                         new InputStreamReader(TPG.openStream())
@@ -70,7 +72,7 @@ public class Analyzer {
         // Output the word counts as a two-column array
         for (Map.Entry<String, Integer> entry : wordCountList) {
 
-            System.out.println(entry.getKey() + " - " + entry.getValue()); //Prints hash map with hyphen separated values
+            controller.updateConsole(entry.getKey() + " - " + entry.getValue()); //Prints hash map with hyphen separated values
 
             //FIXME - add values to output to MainController
         }
