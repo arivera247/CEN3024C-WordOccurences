@@ -3,9 +3,8 @@ package CEN3024C.WordOccurrences;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
+import java.sql.*;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,6 +56,9 @@ public class Analyzer {
         String[] words = filteredText.split(" ");
         //FIXME - expand to include punctuation marks
 
+
+        //OLD - ArrayList to store word counts
+        /*
         // HashMap counting word occurrences
         //https://www.geeksforgeeks.org/java-util-hashmap-in-java-with-examples/
         //FIXME - expand to provide only top 20 results
@@ -64,7 +66,28 @@ public class Analyzer {
         for (String word : words) {
             wordCounts.put(word, wordCounts.getOrDefault(word, 0) + 1);
         }
+         */
 
+
+        //NEW - Database to store word counts
+
+        try (Connection connection = dbConnect()) {
+            initializeTable(connection);
+
+            Map<String, Integer> wordCounts = new HashMap<>();
+            for (String word : words) {
+                if (word.equalsIgnoreCase("the") || word.equalsIgnoreCase("test") || word.equalsIgnoreCase("this") || word.equalsIgnoreCase("a")) {
+                    wordCounts.put(word, wordCounts.getOrDefault(word, 0) + 1);
+                    updateWordCount(connection, word, wordCounts.get(word));
+                }
+            }
+        }
+
+
+
+
+        //OLD - ArrayList to store word counts
+        /*
         // Sort the word counts by frequency
         List<Map.Entry<String, Integer>> wordCountList = new ArrayList<>(wordCounts.entrySet());
         wordCountList.sort((entry1, entry2) -> entry2.getValue() - entry1.getValue());
@@ -74,7 +97,42 @@ public class Analyzer {
 
             controller.updateConsole(entry.getKey() + " - " + entry.getValue()); //Prints hash map with hyphen separated values
 
-            //FIXME - add values to output to MainController
         }
+        */
+    }
+
+    //New Database methods
+
+    //Method to connect to the database
+    private static Connection dbConnect() throws SQLException {
+        String url = "jdbc:h2:~/word_occurrences;INIT=RUNSCRIPT FROM 'classpath:/init.sql'";
+        String user = "root";
+        String password = ""; //No password is currently assigned to database
+        return DriverManager.getConnection(url, user, password);
+    }
+
+    //Methods to create a table
+
+    private static void initializeTable(Connection dbConnect) throws SQLException {
+
+        String createSQLTable = "CREATE TABLE IF NOT EXISTS word_count (word VARCHAR(255), count INTEGER)";
+        try (Statement statement = dbConnect.createStatement()) {
+            statement.execute(createSQLTable);
+        }
+    }
+
+    //Method to update word counts in the database
+
+    private static void updateWordCount(Connection dbConnect, String word, int increment) throws SQLException {
+        String updateSQL = "MERGE INTO word_count (word, count) KEY (word) VALUES (?, ?)";
+        try (PreparedStatement statement = dbConnect.prepareStatement(updateSQL)) {
+            statement.setString(1, word);
+            statement.setInt(2, increment);
+            statement.executeUpdate();
+        }
+
+        //String updateSQL = "MERGE INTO word_count (word, count) KEY (word) VALUES (?, ?)";
+
+
     }
 }

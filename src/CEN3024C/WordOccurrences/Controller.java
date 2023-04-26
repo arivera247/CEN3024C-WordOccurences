@@ -19,8 +19,9 @@ public class Controller {
         return urlTextArea.getText();
     }
 
-    public void updateConsole(String message) {
-    	consoleTextArea.appendText(message + "\n");
+    public void updateConsole(String message){
+
+        consoleTextArea.appendText(message + "\n");
     }
 
     @FXML
@@ -37,6 +38,4 @@ public class Controller {
         //wordOccurrence.setText("Test");
         //FIXME - add values to import console results from wordOccurrences class.
     }
-
-
 }
